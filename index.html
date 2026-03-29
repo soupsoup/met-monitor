@@ -122,9 +122,11 @@
       background: var(--card);
       border-radius: 14px;
       box-shadow: 0 1px 6px rgba(0,0,0,.08);
-      overflow: hidden;
+      overflow: visible; /* don't clip inner scroll containers */
+      /* clip only the visual corners */
     }
 
+    /* Use a separate element for the rounded header clip */
     .card-header {
       background: var(--mets-blue);
       color: white;
@@ -136,6 +138,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      border-radius: 14px 14px 0 0;
     }
 
     .card-header .icon { font-size: 1rem; }
@@ -238,18 +241,20 @@
     .game-opp  { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .game-date { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+    .game-score-wrap {
+      flex-shrink: 0;
+      text-align: right;
+    }
+
     .game-score {
       font-weight: 700;
-      font-size: 1rem;
-      text-align: right;
+      font-size: 0.9rem;
       white-space: nowrap;
-      flex-shrink: 0;
     }
 
     .game-note {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--muted);
-      text-align: right;
       white-space: nowrap;
     }
 
@@ -257,14 +262,16 @@
     .standings-wrap {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      width: 100%;
+      max-width: 100%;
+      display: block;
     }
 
     .standings-table {
-      width: 100%;
       border-collapse: collapse;
       font-size: 0.87rem;
       min-width: 320px;
+      width: max-content;
+      max-width: 100%;
     }
 
     .standings-table th {
@@ -347,14 +354,15 @@
     .linescore-wrap {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      width: 100%;
+      max-width: 100%;
+      display: block;
     }
 
     .linescore {
-      width: 100%;
       border-collapse: collapse;
       font-size: 0.82rem;
       min-width: 420px;
+      width: max-content;
     }
 
     .linescore th {
@@ -470,7 +478,7 @@
             <div class="game-opp">vs Pittsburgh Pirates</div>
             <div class="game-date">Sun, Mar 29 · Citi Field</div>
           </div>
-          <div>
+          <div class="game-score-wrap">
             <div class="game-score">NYM 3 · PIT 4</div>
             <div class="game-note">F/10 · Split</div>
           </div>
@@ -482,7 +490,7 @@
             <div class="game-opp">vs Pittsburgh Pirates</div>
             <div class="game-date">Sat, Mar 28 · Citi Field</div>
           </div>
-          <div>
+          <div class="game-score-wrap">
             <div class="game-score">NYM 4 · PIT 2</div>
             <div class="game-note">F/11</div>
           </div>
@@ -494,7 +502,7 @@
             <div class="game-opp">vs Pittsburgh Pirates</div>
             <div class="game-date">Thu, Mar 26 · Home Opener</div>
           </div>
-          <div>
+          <div class="game-score-wrap">
             <div class="game-score">NYM 11 · PIT 7</div>
             <div class="game-note">F/9</div>
           </div>
