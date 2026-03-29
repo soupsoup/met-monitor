@@ -192,16 +192,17 @@
     .game-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
 
     .meta-pill {
       background: var(--mets-light);
       color: var(--mets-blue);
       border-radius: 999px;
-      padding: 4px 12px;
-      font-size: 0.8rem;
+      padding: 4px 10px;
+      font-size: 0.78rem;
       font-weight: 600;
+      white-space: nowrap;
     }
 
     /* ── Recent Games ── */
@@ -253,16 +254,23 @@
     }
 
     /* ── Standings ── */
+    .standings-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+    }
+
     .standings-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.87rem;
+      min-width: 320px;
     }
 
     .standings-table th {
       background: var(--mets-light);
       color: var(--mets-blue);
-      padding: 8px 12px;
+      padding: 8px 10px;
       text-align: center;
       font-weight: 700;
       font-size: 0.78rem;
@@ -273,7 +281,7 @@
     .standings-table th:first-child { text-align: left; }
 
     .standings-table td {
-      padding: 10px 12px;
+      padding: 10px 10px;
       text-align: center;
       border-bottom: 1px solid #f0f0f0;
     }
@@ -529,36 +537,38 @@
     <!-- NL East Standings -->
     <div class="card section-gap">
       <div class="card-header"><span class="icon">📋</span> NL East Standings · 2026</div>
-      <table class="standings-table">
-        <thead>
-          <tr>
-            <th>Team</th>
-            <th>W</th><th>L</th><th>PCT</th><th>GB</th><th>Strk</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Miami Marlins</td>
-            <td>3</td><td>0</td><td class="pct">1.000</td><td>—</td><td>W3</td>
-          </tr>
-          <tr class="mets-row">
-            <td>New York Mets <span class="wc-badge">WC1</span></td>
-            <td>2</td><td>1</td><td class="pct">.667</td><td>1.0</td><td>L1</td>
-          </tr>
-          <tr>
-            <td>Washington Nationals <span class="wc-badge">WC</span></td>
-            <td>2</td><td>1</td><td class="pct">.667</td><td>1.0</td><td>W1</td>
-          </tr>
-          <tr>
-            <td>Atlanta Braves <span class="wc-badge">WC</span></td>
-            <td>2</td><td>1</td><td class="pct">.667</td><td>1.0</td><td>L1</td>
-          </tr>
-          <tr>
-            <td>Philadelphia Phillies</td>
-            <td>1</td><td>2</td><td class="pct">.333</td><td>2.0</td><td>L2</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="standings-wrap">
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>W</th><th>L</th><th>PCT</th><th>GB</th><th>Strk</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Miami Marlins</td>
+              <td>3</td><td>0</td><td class="pct">1.000</td><td>—</td><td>W3</td>
+            </tr>
+            <tr class="mets-row">
+              <td>NY Mets <span class="wc-badge">WC1</span></td>
+              <td>2</td><td>1</td><td class="pct">.667</td><td>1.0</td><td>L1</td>
+            </tr>
+            <tr>
+              <td>Washington <span class="wc-badge">WC</span></td>
+              <td>2</td><td>1</td><td class="pct">.667</td><td>1.0</td><td>W1</td>
+            </tr>
+            <tr>
+              <td>Atlanta <span class="wc-badge">WC</span></td>
+              <td>2</td><td>1</td><td class="pct">.667</td><td>1.0</td><td>L1</td>
+            </tr>
+            <tr>
+              <td>Philadelphia</td>
+              <td>1</td><td>2</td><td class="pct">.333</td><td>2.0</td><td>L2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
   </div>
@@ -602,7 +612,7 @@
     <!-- Season Snapshot -->
     <div class="card section-gap">
       <div class="card-header"><span class="icon">⚡</span> Season Snapshot</div>
-      <div style="padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0;">
 
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:.85rem; color:var(--muted);">Record</span>
