@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Met Monitor 🔵🟠 — NY Mets News & Scores</title>
+  <style>
+    :root {
+      --mets-blue: #002D72;
+      --mets-orange: #FF5910;
+      --mets-light: #EAF0FB;
+      --win: #1a7a3c;
+      --loss: #b91c1c;
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --muted: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, var(--mets-blue) 0%, #003fa3 100%);
+      color: white;
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,.35);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-ball {
+      width: 44px;
+      height: 44px;
+      background: var(--mets-orange);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+
+    .logo h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -.5px; }
+    .logo h1 span { color: var(--mets-orange); }
+
+    .record-badge {
+      background: var(--mets-orange);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+
+    .updated {
+      font-size: 0.78rem;
+      opacity: .7;
+      white-space: nowrap;
+    }
+
+    /* ── Layout ── */
+    main {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+    }
+
+    @media (max-width: 780px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: var(--mets-blue);
+      color: white;
+      padding: 12px 18px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-header .icon { font-size: 1rem; }
+
+    /* ── Next Game ── */
+    .next-game-body {
+      padding: 20px 18px;
+    }
+
+    .matchup {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .team-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .team-abbr {
+      font-size: 2.2rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .team-abbr.mets { color: var(--mets-blue); }
+    .team-abbr.opp  { color: #444; }
+
+    .team-name { font-size: 0.75rem; color: var(--muted); }
+
+    .vs-badge {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .game-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta-pill {
+      background: var(--mets-light);
+      color: var(--mets-blue);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* ── Recent Games ── */
+    .games-list { padding: 8px 0; }
+
+    .game-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 18px;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 10px;
+    }
+
+    .game-row:last-child { border-bottom: none; }
+
+    .result-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .result-dot.W { background: var(--win); }
+    .result-dot.L { background: var(--loss); }
+
+    .game-info { flex: 1; }
+    .game-opp  { font-weight: 600; font-size: 0.9rem; }
+    .game-date { font-size: 0.75rem; color: var(--muted); }
+
+    .game-score {
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: right;
+    }
+
+    .game-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* ── Standings ── */
+    .standings-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.87rem;
+    }
+
+    .standings-table th {
+      background: var(--mets-light);
+      color: var(--mets-blue);
+      padding: 8px 12px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .standings-table th:first-child { text-align: left; }
+
+    .standings-table td {
+      padding: 10px 12px;
+      text-align: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .standings-table td:first-child { text-align: left; font-weight: 500; }
+
+    .standings-table tr:last-child td { border-bottom: none; }
+
+    .standings-table tr.mets-row td {
+      background: #fff9f0;
+      font-weight: 700;
+    }
+
+    .standings-table tr.mets-row td:first-child {
+      color: var(--mets-blue);
+    }
+
+    .pct { color: var(--muted); }
+
+    .wc-badge {
+      display: inline-block;
+      background: var(--mets-orange);
+      color: white;
+      border-radius: 3px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    /* ── News ── */
+    .news-list { padding: 0; }
+
+    .news-item {
+      display: block;
+      padding: 14px 18px;
+      border-bottom: 1px solid #f0f0f0;
+      text-decoration: none;
+      color: inherit;
+      transition: background .15s;
+    }
+
+    .news-item:hover { background: var(--mets-light); }
+    .news-item:last-child { border-bottom: none; }
+
+    .news-source {
+      font-size: 0.72rem;
+      color: var(--mets-orange);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 3px;
+    }
+
+    .news-headline {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    /* ── Linescore ── */
+    .linescore-wrap { overflow-x: auto; }
+
+    .linescore {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      min-width: 420px;
+    }
+
+    .linescore th {
+      background: var(--mets-light);
+      color: var(--mets-blue);
+      padding: 7px 8px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .linescore th:first-child { text-align: left; min-width: 100px; }
+
+    .linescore td {
+      padding: 9px 8px;
+      text-align: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .linescore td:first-child { text-align: left; font-weight: 600; }
+    .linescore tr:last-child td { border-bottom: none; }
+
+    .linescore .total { font-weight: 800; background: #f8f8f8; }
+
+    .team-label.mets-label { color: var(--mets-blue); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    footer a { color: var(--mets-blue); text-decoration: none; }
+
+    /* ── Section dividers ── */
+    .section-gap { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-ball">⚾</div>
+      <h1>Met <span>Monitor</span></h1>
+    </div>
+    <div class="record-badge">2026 Season · 2–1 (.667)</div>
+    <div class="updated">Updated Mar 29, 2026 · 10:12 PM UTC</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── LEFT COLUMN ── -->
+  <div>
+
+    <!-- Next Game -->
+    <div class="card section-gap">
+      <div class="card-header"><span class="icon">📅</span> Next Game</div>
+      <div class="next-game-body">
+        <div class="matchup">
+          <div class="team-chip">
+            <div class="team-abbr mets">NYM</div>
+            <div class="team-name">New York Mets</div>
+          </div>
+          <div class="vs-badge">@ STL</div>
+          <div class="team-chip">
+            <div class="team-abbr opp">STL</div>
+            <div class="team-name">St. Louis Cardinals</div>
+          </div>
+        </div>
+        <div class="game-meta">
+          <div class="meta-pill">📍 Busch Stadium</div>
+          <div class="meta-pill">🗓 Mon, Mar 30</div>
+          <div class="meta-pill">🕟 7:45 PM ET</div>
+          <div class="meta-pill">📺 Regular Season</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Games -->
+    <div class="card section-gap">
+      <div class="card-header"><span class="icon">🏆</span> Recent Games</div>
+      <div class="games-list">
+
+        <div class="game-row">
+          <div class="result-dot L">L</div>
+          <div class="game-info">
+            <div class="game-opp">vs Pittsburgh Pirates</div>
+            <div class="game-date">Sun, Mar 29 · Citi Field</div>
+          </div>
+          <div>
+            <div class="game-score">3 – 4</div>
+            <div class="game-note">F/10 · Series split 1–1</div>
+          </div>
+        </div>
+
+        <div class="game-row">
+          <div class="result-dot W">W</div>
+          <div class="game-info">
+            <div class="game-opp">vs Pittsburgh Pirates</div>
+            <div class="game-date">Sat, Mar 28 · Citi Field</div>
+          </div>
+          <div>
+            <div class="game-score">4 – 2</div>
+            <div class="game-note">F/11</div>
+          </div>
+        </div>
+
+        <div class="game-row">
+          <div class="result-dot W">W</div>
+          <div class="game-info">
+            <div class="game-opp">vs Pittsburgh Pirates</div>
+            <div class="game-date">Thu, Mar 26 · Citi Field · Home Opener</div>
+          </div>
+          <div>
+            <div class="game-score">11 – 7</div>
+            <div class="game-note">F/9</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Today's Linescore (Mar 29) -->
+    <div class="card section-gap">
+      <div class="card-header"><span class="icon">📊</span> Linescore · Mar 29 vs PIT (F/10)</div>
+      <div class="linescore-wrap">
+        <table class="linescore">
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+              <th>6</th><th>7</th><th>8</th><th>9</th><th>10</th>
+              <th class="total">R</th><th class="total">H</th><th class="total">E</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PIT</td>
+              <td>1</td><td>0</td><td>1</td><td>0</td><td>0</td>
+              <td>0</td><td>0</td><td>0</td><td>0</td><td>2</td>
+              <td class="total">4</td><td class="total">7</td><td class="total">1</td>
+            </tr>
+            <tr class="mets-row">
+              <td class="team-label mets-label">NYM ✦</td>
+              <td>0</td><td>1</td><td>0</td><td>0</td><td>1</td>
+              <td>0</td><td>0</td><td>0</td><td>0</td><td>1</td>
+              <td class="total">3</td><td class="total">9</td><td class="total">1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NL East Standings -->
+    <div class="card section-gap">
+      <div class="card-header"><span class="icon">📋</span> NL East Standings · 2026</div>
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>Team</th>
+            <th>W</th><th>L</th><th>PCT</th><th>GB</th><th>Strk</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Miami Marlins</td>
+            <td>3</td><td>0</td><td class="pct">1.000</td><td>—</td><td>W3</td>
+          </tr>
+          <tr class="mets-row">
+            <td>New York Mets <span class="wc-badge">WC1</span></td>
+            <td>2</td><td>1</td><td class="pct">.667</td><td>1.0</td><td>L1</td>
+          </tr>
+          <tr>
+            <td>Washington Nationals <span class="wc-badge">WC</span></td>
+            <td>2</td><td>1</td><td class="pct">.667</td><td>1.0</td><td>W1</td>
+          </tr>
+          <tr>
+            <td>Atlanta Braves <span class="wc-badge">WC</span></td>
+            <td>2</td><td>1</td><td class="pct">.667</td><td>1.0</td><td>L1</td>
+          </tr>
+          <tr>
+            <td>Philadelphia Phillies</td>
+            <td>1</td><td>2</td><td class="pct">.333</td><td>2.0</td><td>L2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT COLUMN ── -->
+  <div>
+
+    <!-- Latest News -->
+    <div class="card section-gap">
+      <div class="card-header"><span class="icon">📰</span> Latest News</div>
+      <div class="news-list">
+
+        <a class="news-item" href="https://nypost.com/2026/03/26/sports/mets-vs-pirates-live-updates-mlb-opening-day-2026-scores-news-and-highlights/" target="_blank" rel="noopener">
+          <div class="news-source">NY Post</div>
+          <div class="news-headline">Mets jump on Paul Skenes early in dominant 11–7 Opening Day win over Pirates</div>
+        </a>
+
+        <a class="news-item" href="https://www.cbsnews.com/newyork/news/mets-game-opening-day-2026-ny-mlb/" target="_blank" rel="noopener">
+          <div class="news-source">CBS New York</div>
+          <div class="news-headline">Mets take on Pirates in 2026 home opener at Citi Field — what you need to know</div>
+        </a>
+
+        <a class="news-item" href="https://www.northjersey.com/story/sports/mlb/mets/2026/03/26/ny-mets-pirates-score-live-updates-highlights-opening-day-2026/89288837007/" target="_blank" rel="noopener">
+          <div class="news-source">NorthJersey.com</div>
+          <div class="news-headline">NY Mets vs Pirates score & highlights from Opening Day 2026</div>
+        </a>
+
+        <a class="news-item" href="https://www.nbcsports.com/mlb/live/2026-mlb-opening-day-live-updates-scores-results-highlights-including-mets-vs-pirates-dodgers-vs-d-backs" target="_blank" rel="noopener">
+          <div class="news-source">NBC Sports</div>
+          <div class="news-headline">2026 MLB Opening Day live updates: Scores, results, highlights — Mets vs Pirates</div>
+        </a>
+
+        <a class="news-item" href="https://www.nbcnewyork.com/news/local/check-out-the-new-york-mets-full-2026-mlb-schedule/6481647/" target="_blank" rel="noopener">
+          <div class="news-source">NBC New York</div>
+          <div class="news-headline">New York Mets full 2026 MLB schedule</div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Season Snapshot -->
+    <div class="card section-gap">
+      <div class="card-header"><span class="icon">⚡</span> Season Snapshot</div>
+      <div style="padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:.85rem; color:var(--muted);">Record</span>
+          <span style="font-weight:700;">2–1 (.667)</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:.85rem; color:var(--muted);">NL East Rank</span>
+          <span style="font-weight:700;">2nd (1.0 GB)</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:.85rem; color:var(--muted);">Wild Card</span>
+          <span style="font-weight:700; color:var(--mets-orange);">#1 Wild Card</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:.85rem; color:var(--muted);">Runs Scored</span>
+          <span style="font-weight:700;">18</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:.85rem; color:var(--muted);">Runs Allowed</span>
+          <span style="font-weight:700;">13</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:.85rem; color:var(--muted);">Run Differential</span>
+          <span style="font-weight:700; color:var(--win);">+5</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:.85rem; color:var(--muted);">Current Streak</span>
+          <span style="font-weight:700; color:var(--loss);">L1</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:.85rem; color:var(--muted);">Extra Innings</span>
+          <span style="font-weight:700;">1–1</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:.85rem; color:var(--muted);">Home</span>
+          <span style="font-weight:700;">2–1</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:.85rem; color:var(--muted);">Away</span>
+          <span style="font-weight:700;">0–0</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Data Source -->
+    <div style="text-align:center; font-size:0.75rem; color:var(--muted); padding: 4px 8px;">
+      Data via <a href="https://statsapi.mlb.com" target="_blank" rel="noopener" style="color:var(--mets-blue);">MLB Stats API</a> &amp; MLB.com
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  <p>Met Monitor · Built by Jarvis · Data sourced from MLB Stats API &amp; public news</p>
+  <p style="margin-top:4px;">⚾ Let's Go Mets! ⚾</p>
+</footer>
+
+</body>
+</html>
