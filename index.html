@@ -149,7 +149,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 8px;
       margin-bottom: 14px;
     }
 
@@ -158,10 +158,12 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
+      min-width: 0;
+      flex: 1;
     }
 
     .team-abbr {
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 900;
       line-height: 1;
     }
@@ -169,13 +171,22 @@
     .team-abbr.mets { color: var(--mets-blue); }
     .team-abbr.opp  { color: #444; }
 
-    .team-name { font-size: 0.75rem; color: var(--muted); }
+    .team-name {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
 
     .vs-badge {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--muted);
       flex-shrink: 0;
+      text-align: center;
     }
 
     .game-meta {
@@ -222,20 +233,23 @@
     .result-dot.W { background: var(--win); }
     .result-dot.L { background: var(--loss); }
 
-    .game-info { flex: 1; }
-    .game-opp  { font-weight: 600; font-size: 0.9rem; }
-    .game-date { font-size: 0.75rem; color: var(--muted); }
+    .game-info { flex: 1; min-width: 0; }
+    .game-opp  { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .game-date { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .game-score {
       font-weight: 700;
       font-size: 1rem;
       text-align: right;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .game-note {
       font-size: 0.72rem;
       color: var(--muted);
       text-align: right;
+      white-space: nowrap;
     }
 
     /* ── Standings ── */
@@ -449,8 +463,8 @@
             <div class="game-date">Sun, Mar 29 · Citi Field</div>
           </div>
           <div>
-            <div class="game-score">3 – 4</div>
-            <div class="game-note">F/10 · Series split 1–1</div>
+            <div class="game-score">NYM 3 · PIT 4</div>
+            <div class="game-note">F/10 · Split</div>
           </div>
         </div>
 
@@ -461,7 +475,7 @@
             <div class="game-date">Sat, Mar 28 · Citi Field</div>
           </div>
           <div>
-            <div class="game-score">4 – 2</div>
+            <div class="game-score">NYM 4 · PIT 2</div>
             <div class="game-note">F/11</div>
           </div>
         </div>
@@ -470,10 +484,10 @@
           <div class="result-dot W">W</div>
           <div class="game-info">
             <div class="game-opp">vs Pittsburgh Pirates</div>
-            <div class="game-date">Thu, Mar 26 · Citi Field · Home Opener</div>
+            <div class="game-date">Thu, Mar 26 · Home Opener</div>
           </div>
           <div>
-            <div class="game-score">11 – 7</div>
+            <div class="game-score">NYM 11 · PIT 7</div>
             <div class="game-note">F/9</div>
           </div>
         </div>
