@@ -243,6 +243,45 @@
     /* ── X Feed ── */
     .x-pad { padding: 12px; }
 
+    .tweet-list { list-style: none; }
+
+    .tweet-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.83rem;
+      line-height: 1.45;
+    }
+    .tweet-item:last-child { border-bottom: none; }
+
+    .tweet-author {
+      font-weight: 700;
+      color: var(--blue);
+      font-size: 0.8rem;
+      margin-bottom: 3px;
+    }
+
+    .tweet-text { color: #1a1a2e; word-break: break-word; }
+
+    .tweet-time {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .feed-loading {
+      padding: 20px 14px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .feed-error {
+      padding: 14px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
     /* ── Footer ── */
     footer { text-align: center; padding: 20px 12px; font-size: 0.75rem; color: var(--muted); }
     footer a { color: var(--blue); text-decoration: none; }
@@ -448,19 +487,90 @@
       </div>
     </div>
 
-    <!-- X / Twitter Feed -->
+    <!-- Nitter Feed -->
     <div class="card">
-      <div class="card-hdr">🐦 Mets Twitter Feed</div>
-      <div class="x-pad">
-        <a class="twitter-timeline"
-           data-height="480"
-           data-tweet-limit="8"
-           href="https://twitter.com/i/lists/4510882">
-          Loading Mets tweets…
-        </a>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+      <div class="card-hdr">🐦 Mets Feed</div>
+      <div id="tweet-container">
+        <div class="feed-loading">Loading tweets…</div>
       </div>
     </div>
+
+    <script>
+      (async function() {
+        const container = document.getElementById('tweet-container');
+
+        // Try a list of public Nitter instances — use whichever responds first
+        const nitterInstances = [
+          'https://nitter.net',
+          'https://nitter.privacydev.net',
+          'https://nitter.poast.org',
+        ];
+
+        // CORS proxy options
+        const corsProxy = 'https://api.allorigins.win/get?url=';
+        const listId = '4510882';
+
+        let xml = null;
+        let usedInstance = null;
+
+        for (const instance of nitterInstances) {
+          try {
+            const feedUrl = `${instance}/i/lists/${listId}/rss`;
+            const res = await fetch(`${corsProxy}${encodeURIComponent(feedUrl)}`, { signal: AbortSignal.timeout(6000) });
+            if (!res.ok) continue;
+            const data = await res.json();
+            if (!data.contents || data.contents.length < 100) continue;
+            xml = data.contents;
+            usedInstance = instance;
+            break;
+          } catch(e) { continue; }
+        }
+
+        if (!xml) {
+          container.innerHTML = `<div class="feed-error">⚠️ Couldn't load feed — Nitter instances may be down.<br><a href="https://twitter.com/i/lists/4510882" target="_blank" rel="noopener" style="color:var(--blue)">View on X/Twitter →</a></div>`;
+          return;
+        }
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xml, 'text/xml');
+        const items = Array.from(doc.querySelectorAll('item')).slice(0, 10);
+
+        if (!items.length) {
+          container.innerHTML = `<div class="feed-error">No tweets found.</div>`;
+          return;
+        }
+
+        const ul = document.createElement('ul');
+        ul.className = 'tweet-list';
+
+        for (const item of items) {
+          const title = item.querySelector('title')?.textContent || '';
+          const desc  = item.querySelector('description')?.textContent || '';
+          const link  = item.querySelector('link')?.textContent || '#';
+          const pubDate = item.querySelector('pubDate')?.textContent || '';
+          const creator = item.querySelector('creator')?.textContent || title.split(':')[0] || '';
+
+          // Strip HTML tags from description
+          const tmp = document.createElement('div');
+          tmp.innerHTML = desc;
+          const text = tmp.textContent.trim().replace(/\s+/g, ' ');
+
+          const date = pubDate ? new Date(pubDate).toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+
+          const li = document.createElement('li');
+          li.className = 'tweet-item';
+          li.innerHTML = `
+            <div class="tweet-author">${creator.replace(/^@/, '') || 'Mets'}</div>
+            <div class="tweet-text">${text}</div>
+            <div class="tweet-time"><a href="${link}" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:none">${date}</a></div>
+          `;
+          ul.appendChild(li);
+        }
+
+        container.innerHTML = '';
+        container.appendChild(ul);
+      })();
+    </script>
 
   </div><!-- /right -->
 
