@@ -337,6 +337,16 @@
 
     .team-label.mets-label { color: var(--mets-blue); }
 
+    /* ── X / Twitter Feed ── */
+    .x-feed-wrap {
+      padding: 12px;
+    }
+
+    .x-feed-wrap .twitter-timeline {
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
     /* ── Footer ── */
     footer {
       text-align: center;
@@ -596,6 +606,22 @@
           <span style="font-weight:700;">0–0</span>
         </div>
 
+      </div>
+    </div>
+
+    <!-- X / Twitter List Feed -->
+    <div class="card section-gap">
+      <div class="card-header"><span class="icon">🐦</span> Mets Twitter Feed</div>
+      <div class="x-feed-wrap">
+        <a class="twitter-timeline"
+           data-theme="light"
+           data-chrome="noheader nofooter noborders"
+           data-tweet-limit="8"
+           data-height="520"
+           href="https://twitter.com/i/lists/4510882">
+          Loading Mets tweets…
+        </a>
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
       </div>
     </div>
 
