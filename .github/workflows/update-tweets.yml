@@ -1,0 +1,137 @@
+name: Update Tweets
+
+on:
+  schedule:
+    # Runs daily at 8:00 AM UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  update-tweets:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run Apify Twitter List Scraper
+        id: apify
+        run: |
+          echo "Starting Apify actor run..."
+
+          # Start the actor run
+          RUN_RESPONSE=$(curl -s -X POST \
+            "https://api.apify.com/v2/acts/apidojo~twitter-scraper-lite/runs?token=${{ secrets.APIFY_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "startUrls": [{"url": "https://x.com/i/lists/4510882"}],
+              "maxItems": 20,
+              "sort": "Latest"
+            }')
+
+          echo "Run response: $RUN_RESPONSE"
+
+          RUN_ID=$(echo "$RUN_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['data']['id'])")
+          echo "Run ID: $RUN_ID"
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+
+          # Poll until finished (max 5 minutes)
+          for i in $(seq 1 30); do
+            sleep 10
+            STATUS=$(curl -s \
+              "https://api.apify.com/v2/actor-runs/$RUN_ID?token=${{ secrets.APIFY_API_TOKEN }}" \
+              | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['data']['status'])")
+            echo "Status ($i): $STATUS"
+            if [ "$STATUS" = "SUCCEEDED" ]; then
+              echo "Run succeeded!"
+              break
+            elif [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "ABORTED" ] || [ "$STATUS" = "TIMED-OUT" ]; then
+              echo "Run ended with status: $STATUS"
+              exit 1
+            fi
+          done
+
+          # Download dataset
+          DATASET_ID=$(curl -s \
+            "https://api.apify.com/v2/actor-runs/$RUN_ID?token=${{ secrets.APIFY_API_TOKEN }}" \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['data']['defaultDatasetId'])")
+
+          echo "Dataset ID: $DATASET_ID"
+
+          curl -s \
+            "https://api.apify.com/v2/datasets/$DATASET_ID/items?token=${{ secrets.APIFY_API_TOKEN }}&format=json&clean=true" \
+            -o raw_tweets.json
+
+          echo "Raw tweets downloaded."
+
+      - name: Normalize tweets to tweets.json
+        run: |
+          python3 << 'EOF'
+          import json, re, sys
+
+          with open("raw_tweets.json") as f:
+              raw = json.load(f)
+
+          tweets = []
+          for t in raw[:20]:
+              # Handle various field name shapes from the actor
+              author = (
+                  t.get("author", {}).get("userName") or
+                  t.get("user", {}).get("screen_name") or
+                  t.get("userName") or
+                  t.get("screen_name") or
+                  "unknown"
+              )
+              display_name = (
+                  t.get("author", {}).get("name") or
+                  t.get("user", {}).get("name") or
+                  t.get("name") or
+                  author
+              )
+              text = (
+                  t.get("full_text") or
+                  t.get("text") or
+                  t.get("tweet_text") or
+                  ""
+              )
+              created_at = (
+                  t.get("createdAt") or
+                  t.get("created_at") or
+                  t.get("timestamp") or
+                  ""
+              )
+              tweet_id = (
+                  str(t.get("id") or t.get("tweet_id") or t.get("id_str") or "")
+              )
+              url = (
+                  t.get("url") or
+                  (f"https://x.com/{author}/status/{tweet_id}" if tweet_id else "#")
+              )
+
+              tweets.append({
+                  "author": author,
+                  "displayName": display_name,
+                  "text": text,
+                  "createdAt": created_at,
+                  "url": url,
+              })
+
+          with open("tweets.json", "w") as f:
+              json.dump(tweets, f, indent=2)
+
+          print(f"Wrote {len(tweets)} tweets to tweets.json")
+          EOF
+
+      - name: Commit tweets.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tweets.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: update tweets.json [skip ci]"
+            git push
+          fi
