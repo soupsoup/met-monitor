@@ -797,7 +797,7 @@
         if (!stat || Object.keys(stat).length === 0) {
           return 'No hitting stats yet.';
         }
-        return `AVG ${stat.avg || '—'} · OBP ${stat.obp || '—'} · SLG ${stat.slg || '—'} · OPS ${stat.ops || '—'} · HR ${stat.homeRuns || 0} · RBI ${stat.rbi || 0}`;
+        return `AB ${stat.atBats || 0} · H ${stat.hits || 0} · AVG ${stat.avg || '—'} · OBP ${stat.obp || '—'} · SLG ${stat.slg || '—'} · OPS ${stat.ops || '—'} · HR ${stat.homeRuns || 0} · RBI ${stat.rbi || 0}`;
       }
 
       function formatPitchingStats(stat) {
