@@ -449,14 +449,10 @@
       const CURRENT_SEASON = 2026;
       const NEWS_JSON_PATH = 'news.json';
       const NEWS_REFRESH_MS = 20 * 60 * 1000;
-      const PLAYER_STATS = [
-        { id: 666182, name: 'Bo Bichette', position: 'SS', type: 'hitting' },
-        { id: 596019, name: 'Francisco Lindor', position: 'SS', type: 'hitting' },
-        { id: 682626, name: 'Francisco Alvarez', position: 'C', type: 'hitting' },
-        { id: 605280, name: 'Clay Holmes', position: 'P', type: 'pitching' },
-        { id: 656849, name: 'David Peterson', position: 'P', type: 'pitching' },
-        { id: 642547, name: 'Freddy Peralta', position: 'P', type: 'pitching' }
-      ];
+      const STATS_THRESHOLDS = {
+        hitting: { atBats: 30 },
+        pitching: { gamesStarted: 2 }
+      };
 
       async function fetchMetsData() {
         try {
@@ -760,23 +756,55 @@
 
         body.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px; color: var(--muted);">Loading player stats...</td></tr>';
 
-        const statsPromises = PLAYER_STATS.map(player => fetchPlayerStat(player));
-        const playerStats = await Promise.all(statsPromises);
+        try {
+          const rosterResponse = await fetch(`${MLB_API_BASE}/teams/${METS_TEAM_ID}/roster?rosterType=active`);
+          if (!rosterResponse.ok) throw new Error('Failed to fetch active roster');
+          const rosterData = await rosterResponse.json();
 
-        const rows = playerStats.map(player => {
-          const title = `<div class="player-name"><strong>${player.name}</strong><span class="player-pos">${player.position}</span></div>`;
-          const statLine = player.type === 'hitting'
-            ? formatHittingStats(player.stats)
-            : formatPitchingStats(player.stats);
-          return `
-            <tr>
-              <td>${title}</td>
-              <td><div class="player-stat-line">${statLine}</div></td>
-            </tr>
-          `;
-        }).join('');
+          const players = rosterData.roster.map(member => ({
+            id: member.person.id,
+            name: member.person.fullName,
+            position: member.position.abbreviation || member.position.name || 'N/A',
+            type: member.position.type === 'Pitcher' ? 'pitching' : 'hitting'
+          }));
 
-        body.innerHTML = rows || '<tr><td colspan="2" style="text-align: center; padding: 20px; color: var(--muted);">No player stats available.</td></tr>';
+          const statsPromises = players.map(player => fetchPlayerStat(player));
+          const playerStats = await Promise.all(statsPromises);
+
+          const filtered = playerStats.filter(player => {
+            if (!player.stats) return false;
+            const thresholds = STATS_THRESHOLDS[player.type];
+            if (player.type === 'hitting') {
+              return Number(player.stats.atBats || 0) > thresholds.atBats;
+            }
+            if (player.type === 'pitching') {
+              return Number(player.stats.gamesStarted || 0) >= thresholds.gamesStarted;
+            }
+            return false;
+          });
+
+          const rows = filtered.sort((a, b) => {
+            if (a.type !== b.type) return a.type === 'hitting' ? -1 : 1;
+            if (a.type === 'hitting') return (Number(b.stats.atBats || 0) - Number(a.stats.atBats || 0));
+            return (Number(b.stats.gamesStarted || 0) - Number(a.stats.gamesStarted || 0));
+          }).map(player => {
+            const title = `<div class="player-name"><strong>${player.name}</strong><span class="player-pos">${player.position}</span></div>`;
+            const statLine = player.type === 'hitting'
+              ? formatHittingStats(player.stats)
+              : formatPitchingStats(player.stats);
+            return `
+              <tr>
+                <td>${title}</td>
+                <td><div class="player-stat-line">${statLine}</div></td>
+              </tr>
+            `;
+          }).join('');
+
+          body.innerHTML = rows || '<tr><td colspan="2" style="text-align: center; padding: 20px; color: var(--muted);">No players meet the AB or starts threshold yet.</td></tr>';
+        } catch (error) {
+          console.error('Error loading player stats:', error);
+          body.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px; color: var(--loss);">Unable to load player stats.</td></tr>';
+        }
       }
 
       async function fetchPlayerStat(player) {
@@ -804,7 +832,7 @@
         if (!stat || Object.keys(stat).length === 0) {
           return 'No pitching stats yet.';
         }
-        return `${stat.wins || 0}-${stat.losses || 0} · ERA ${stat.era || '—'} · WHIP ${stat.whip || '—'} · K ${stat.strikeOuts || stat.strikeouts || 0} · IP ${stat.inningsPitched || '0.0'}`;
+        return `GS ${stat.gamesStarted || 0} · W ${stat.wins || 0}-${stat.losses || 0} · ERA ${stat.era || '—'} · WHIP ${stat.whip || '—'} · K ${stat.strikeOuts || stat.strikeouts || 0} · IP ${stat.inningsPitched || '0.0'}`;
       }
 
       async function loadNews() {
