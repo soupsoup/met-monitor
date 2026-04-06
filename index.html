@@ -433,8 +433,8 @@
           // Show loading states
           showLoadingStates();
 
-          // Fetch schedule for Mets
-          const scheduleResponse = await fetch(`${MLB_API_BASE}/schedule?sportId=1&teamId=${METS_TEAM_ID}&season=${CURRENT_SEASON}`);
+          // Fetch regular season schedule for Mets only
+          const scheduleResponse = await fetch(`${MLB_API_BASE}/schedule?sportId=1&teamId=${METS_TEAM_ID}&season=${CURRENT_SEASON}&gameTypes=R`);
           if (!scheduleResponse.ok) throw new Error('Failed to fetch schedule');
           const scheduleData = await scheduleResponse.json();
 
