@@ -775,7 +775,7 @@
             if (!player.stats) return false;
             const thresholds = STATS_THRESHOLDS[player.type];
             if (player.type === 'hitting') {
-              return Number(player.stats.atBats || 0) > thresholds.atBats;
+              return Number(player.stats.atBats || 0) >= thresholds.atBats;
             }
             if (player.type === 'pitching') {
               return Number(player.stats.gamesStarted || 0) >= thresholds.gamesStarted;
