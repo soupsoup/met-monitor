@@ -793,12 +793,25 @@ const hittingBody = document.getElementById('player-hitting-stats-body');
         if (!rosterResponse.ok) throw new Error('Failed to fetch active roster');
         const rosterData = await rosterResponse.json();
 
-        const players = rosterData.roster.map(member => ({
-          id: member.person.id,
-          name: member.person.fullName,
-          position: member.position.abbreviation || member.position.name || 'N/A',
-          type: member.position.type === 'Pitcher' ? 'pitching' : 'hitting'
-        }));
+        const players = rosterData.roster.map(member => {
+          const name = member.person.fullName;
+          let position = member.position.abbreviation || member.position.name || 'N/A';
+
+          if (name.includes('Bichette')) {
+            position = '3B';
+          } else if (name.includes('Baty')) {
+            position = 'DH';
+          } else if (name.includes('Polanco')) {
+            position = '1B';
+          }
+
+          return {
+            id: member.person.id,
+            name,
+            position,
+            type: member.position.type === 'Pitcher' ? 'pitching' : 'hitting'
+          };
+        });
 
         const statsPromises = players.map(player => fetchPlayerStat(player));
         const playerStats = await Promise.all(statsPromises);
