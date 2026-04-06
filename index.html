@@ -384,13 +384,12 @@
     <!-- Player Stats -->
     <div class="card" style="margin-bottom:14px">
       <div class="card-hdr">💪 Mets Player Stats</div>
-      <div class="tbl-scroll">
+      <div class="tbl-scroll" style="margin-bottom: 14px">
         <table class="player-stats">
           <thead>
             <tr>
               <th>Player</th>
               <th>Pos</th>
-              <th>Type</th>
               <th>AB</th>
               <th>H</th>
               <th>AVG</th>
@@ -399,6 +398,21 @@
               <th>OPS</th>
               <th>HR</th>
               <th>RBI</th>
+            </tr>
+          </thead>
+          <tbody id="player-hitting-stats-body">
+            <tr>
+              <td colspan="10" style="text-align: center; padding: 20px; color: var(--muted);">Loading hitting stats...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tbl-scroll">
+        <table class="player-stats">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Pos</th>
               <th>GS</th>
               <th>W-L</th>
               <th>ERA</th>
@@ -407,9 +421,9 @@
               <th>IP</th>
             </tr>
           </thead>
-          <tbody id="player-stats-body">
+          <tbody id="player-pitching-stats-body">
             <tr>
-              <td colspan="17" style="text-align: center; padding: 20px; color: var(--muted);">Loading player stats...</td>
+              <td colspan="8" style="text-align: center; padding: 20px; color: var(--muted);">Loading pitching stats...</td>
             </tr>
           </tbody>
         </table>
@@ -767,71 +781,72 @@
       }
 
       async function fetchPlayerStats() {
-        const body = document.getElementById('player-stats-body');
-        if (!body) return;
+const hittingBody = document.getElementById('player-hitting-stats-body');
+      const pitchingBody = document.getElementById('player-pitching-stats-body');
+      if (!hittingBody || !pitchingBody) return;
 
-        body.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px; color: var(--muted);">Loading player stats...</td></tr>';
+      hittingBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px; color: var(--muted);">Loading hitting stats...</td></tr>';
+      pitchingBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--muted);">Loading pitching stats...</td></tr>';
 
-        try {
-          const rosterResponse = await fetch(`${MLB_API_BASE}/teams/${METS_TEAM_ID}/roster?rosterType=active`);
-          if (!rosterResponse.ok) throw new Error('Failed to fetch active roster');
-          const rosterData = await rosterResponse.json();
+      try {
+        const rosterResponse = await fetch(`${MLB_API_BASE}/teams/${METS_TEAM_ID}/roster?rosterType=active`);
+        if (!rosterResponse.ok) throw new Error('Failed to fetch active roster');
+        const rosterData = await rosterResponse.json();
 
-          const players = rosterData.roster.map(member => ({
-            id: member.person.id,
-            name: member.person.fullName,
-            position: member.position.abbreviation || member.position.name || 'N/A',
-            type: member.position.type === 'Pitcher' ? 'pitching' : 'hitting'
-          }));
+        const players = rosterData.roster.map(member => ({
+          id: member.person.id,
+          name: member.person.fullName,
+          position: member.position.abbreviation || member.position.name || 'N/A',
+          type: member.position.type === 'Pitcher' ? 'pitching' : 'hitting'
+        }));
 
-          const statsPromises = players.map(player => fetchPlayerStat(player));
-          const playerStats = await Promise.all(statsPromises);
+        const statsPromises = players.map(player => fetchPlayerStat(player));
+        const playerStats = await Promise.all(statsPromises);
 
-          const filtered = playerStats.filter(player => {
-            if (!player.stats) return false;
-            const thresholds = STATS_THRESHOLDS[player.type];
-            if (player.type === 'hitting') {
-              return Number(player.stats.atBats || 0) >= thresholds.atBats;
-            }
-            if (player.type === 'pitching') {
-              return Number(player.stats.gamesStarted || 0) >= thresholds.gamesStarted;
-            }
-            return false;
-          });
+        const hittingPlayers = playerStats.filter(player => {
+          if (!player.stats || player.type !== 'hitting') return false;
+          return Number(player.stats.atBats || 0) >= STATS_THRESHOLDS.hitting.atBats;
+        });
 
-          const rows = filtered.sort((a, b) => {
-            if (a.type !== b.type) return a.type === 'hitting' ? -1 : 1;
-            if (a.type === 'hitting') return (Number(b.stats.atBats || 0) - Number(a.stats.atBats || 0));
-            return (Number(b.stats.gamesStarted || 0) - Number(a.stats.gamesStarted || 0));
-          }).map(player => {
-            const hitting = player.type === 'hitting';
-            return `
+        const pitchingPlayers = playerStats.filter(player => {
+          if (!player.stats || player.type !== 'pitching') return false;
+          return Number(player.stats.gamesStarted || 0) >= STATS_THRESHOLDS.pitching.gamesStarted;
+        });
+
+        const hittingRows = hittingPlayers.sort((a, b) => Number(b.stats.atBats || 0) - Number(a.stats.atBats || 0)).map(player => `
               <tr>
                 <td><strong>${player.name}</strong></td>
                 <td>${player.position}</td>
-                <td>${player.type}</td>
-                <td>${hitting ? player.stats.atBats || 0 : '—'}</td>
-                <td>${hitting ? player.stats.hits || 0 : '—'}</td>
-                <td>${hitting ? player.stats.avg || '—' : '—'}</td>
-                <td>${hitting ? player.stats.obp || '—' : '—'}</td>
-                <td>${hitting ? player.stats.slg || '—' : '—'}</td>
-                <td>${hitting ? player.stats.ops || '—' : '—'}</td>
-                <td>${hitting ? player.stats.homeRuns || 0 : '—'}</td>
-                <td>${hitting ? player.stats.rbi || 0 : '—'}</td>
-                <td>${!hitting ? player.stats.gamesStarted || 0 : '—'}</td>
-                <td>${!hitting ? `${player.stats.wins || 0}-${player.stats.losses || 0}` : '—'}</td>
-                <td>${!hitting ? player.stats.era || '—' : '—'}</td>
-                <td>${!hitting ? player.stats.whip || '—' : '—'}</td>
-                <td>${!hitting ? player.stats.strikeOuts || player.stats.strikeouts || 0 : '—'}</td>
-                <td>${!hitting ? player.stats.inningsPitched || '0.0' : '—'}</td>
+                <td>${player.stats.atBats || 0}</td>
+                <td>${player.stats.hits || 0}</td>
+                <td>${player.stats.avg || '—'}</td>
+                <td>${player.stats.obp || '—'}</td>
+                <td>${player.stats.slg || '—'}</td>
+                <td>${player.stats.ops || '—'}</td>
+                <td>${player.stats.homeRuns || 0}</td>
+                <td>${player.stats.rbi || 0}</td>
               </tr>
-            `;
-          }).join('');
+            `).join('');
 
-          body.innerHTML = rows || '<tr><td colspan="2" style="text-align: center; padding: 20px; color: var(--muted);">No players meet the AB or starts threshold yet.</td></tr>';
-        } catch (error) {
-          console.error('Error loading player stats:', error);
-          body.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px; color: var(--loss);">Unable to load player stats.</td></tr>';
+        const pitchingRows = pitchingPlayers.sort((a, b) => Number(b.stats.gamesStarted || 0) - Number(a.stats.gamesStarted || 0)).map(player => `
+              <tr>
+                <td><strong>${player.name}</strong></td>
+                <td>${player.position}</td>
+                <td>${player.stats.gamesStarted || 0}</td>
+                <td>${player.stats.wins || 0}-${player.stats.losses || 0}</td>
+                <td>${player.stats.era || '—'}</td>
+                <td>${player.stats.whip || '—'}</td>
+                <td>${player.stats.strikeOuts || player.stats.strikeouts || 0}</td>
+                <td>${player.stats.inningsPitched || '0.0'}</td>
+              </tr>
+            `).join('');
+
+        hittingBody.innerHTML = hittingRows || '<tr><td colspan="10" style="text-align: center; padding: 20px; color: var(--muted);">No hitters meet the AB threshold yet.</td></tr>';
+        pitchingBody.innerHTML = pitchingRows || '<tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--muted);">No pitchers meet the starts threshold yet.</td></tr>';
+      } catch (error) {
+        console.error('Error loading player stats:', error);
+        hittingBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px; color: var(--loss);">Unable to load hitting stats.</td></tr>';
+        pitchingBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--loss);">Unable to load pitching stats.</td></tr>';
         }
       }
 
