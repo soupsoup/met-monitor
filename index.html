@@ -221,6 +221,29 @@
       margin-left: 3px;
     }
 
+    .player-stats {
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .player-stats th,
+    .player-stats td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .player-stats th { background: var(--light); color: var(--blue); font-weight: 700; }
+    .player-stats td:first-child,
+    .player-stats th:first-child { padding-left: 14px; }
+    .player-stats tr:last-child td { border-bottom: none; }
+
+    .player-name { display: flex; gap: 8px; align-items: center; }
+    .player-pos { font-size: 0.75rem; color: var(--muted); }
+    .player-stat-line { font-size: 0.82rem; color: #1a1a2e; }
+
     /* ── News ── */
     a.news {
       display: block;
@@ -357,6 +380,26 @@
       </div>
     </div>
 
+    <!-- Player Stats -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-hdr">💪 Mets Player Stats</div>
+      <div class="tbl-scroll">
+        <table class="player-stats">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Stats</th>
+            </tr>
+          </thead>
+          <tbody id="player-stats-body">
+            <tr>
+              <td colspan="2" style="text-align: center; padding: 20px; color: var(--muted);">Loading player stats...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div><!-- /left -->
 
   <!-- ── RIGHT ── -->
@@ -406,6 +449,14 @@
       const CURRENT_SEASON = 2026;
       const NEWS_JSON_PATH = 'news.json';
       const NEWS_REFRESH_MS = 20 * 60 * 1000;
+      const PLAYER_STATS = [
+        { id: 666182, name: 'Bo Bichette', position: 'SS', type: 'hitting' },
+        { id: 596019, name: 'Francisco Lindor', position: 'SS', type: 'hitting' },
+        { id: 682626, name: 'Francisco Alvarez', position: 'C', type: 'hitting' },
+        { id: 605280, name: 'Clay Holmes', position: 'P', type: 'pitching' },
+        { id: 656849, name: 'David Peterson', position: 'P', type: 'pitching' },
+        { id: 642547, name: 'Freddy Peralta', position: 'P', type: 'pitching' }
+      ];
 
       async function fetchMetsData() {
         try {
@@ -703,6 +754,59 @@
         return 'th';
       }
 
+      async function fetchPlayerStats() {
+        const body = document.getElementById('player-stats-body');
+        if (!body) return;
+
+        body.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px; color: var(--muted);">Loading player stats...</td></tr>';
+
+        const statsPromises = PLAYER_STATS.map(player => fetchPlayerStat(player));
+        const playerStats = await Promise.all(statsPromises);
+
+        const rows = playerStats.map(player => {
+          const title = `<div class="player-name"><strong>${player.name}</strong><span class="player-pos">${player.position}</span></div>`;
+          const statLine = player.type === 'hitting'
+            ? formatHittingStats(player.stats)
+            : formatPitchingStats(player.stats);
+          return `
+            <tr>
+              <td>${title}</td>
+              <td><div class="player-stat-line">${statLine}</div></td>
+            </tr>
+          `;
+        }).join('');
+
+        body.innerHTML = rows || '<tr><td colspan="2" style="text-align: center; padding: 20px; color: var(--muted);">No player stats available.</td></tr>';
+      }
+
+      async function fetchPlayerStat(player) {
+        try {
+          const response = await fetch(`${MLB_API_BASE}/people/${player.id}/stats?stats=statsSingleSeason&season=${CURRENT_SEASON}&group=${player.type}`);
+          if (!response.ok) throw new Error('Failed to fetch player stats');
+          const data = await response.json();
+          const splits = data.stats?.[0]?.splits || [];
+          const stat = splits[0]?.stat || {};
+          return { ...player, stats: stat };
+        } catch (error) {
+          console.error('Player stats load error:', player.name, error);
+          return { ...player, stats: null };
+        }
+      }
+
+      function formatHittingStats(stat) {
+        if (!stat || Object.keys(stat).length === 0) {
+          return 'No hitting stats yet.';
+        }
+        return `AVG ${stat.avg || '—'} · OBP ${stat.obp || '—'} · SLG ${stat.slg || '—'} · OPS ${stat.ops || '—'} · HR ${stat.homeRuns || 0} · RBI ${stat.rbi || 0}`;
+      }
+
+      function formatPitchingStats(stat) {
+        if (!stat || Object.keys(stat).length === 0) {
+          return 'No pitching stats yet.';
+        }
+        return `${stat.wins || 0}-${stat.losses || 0} · ERA ${stat.era || '—'} · WHIP ${stat.whip || '—'} · K ${stat.strikeOuts || stat.strikeouts || 0} · IP ${stat.inningsPitched || '0.0'}`;
+      }
+
       async function loadNews() {
         const newsContainer = document.getElementById('news-container');
         if (!newsContainer) return;
@@ -739,6 +843,7 @@
       // Load data when page loads
       document.addEventListener('DOMContentLoaded', () => {
         fetchMetsData();
+        fetchPlayerStats();
         loadNews();
         setInterval(loadNews, NEWS_REFRESH_MS);
       });
