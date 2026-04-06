@@ -231,13 +231,14 @@
     .player-stats th,
     .player-stats td {
       padding: 8px 10px;
-      text-align: left;
+      text-align: center;
       border-bottom: 1px solid var(--border);
+      white-space: nowrap;
     }
 
     .player-stats th { background: var(--light); color: var(--blue); font-weight: 700; }
     .player-stats td:first-child,
-    .player-stats th:first-child { padding-left: 14px; }
+    .player-stats th:first-child { text-align: left; padding-left: 14px; }
     .player-stats tr:last-child td { border-bottom: none; }
 
     .player-name { display: flex; gap: 8px; align-items: center; }
@@ -388,12 +389,27 @@
           <thead>
             <tr>
               <th>Player</th>
-              <th>Stats</th>
+              <th>Pos</th>
+              <th>Type</th>
+              <th>AB</th>
+              <th>H</th>
+              <th>AVG</th>
+              <th>OBP</th>
+              <th>SLG</th>
+              <th>OPS</th>
+              <th>HR</th>
+              <th>RBI</th>
+              <th>GS</th>
+              <th>W-L</th>
+              <th>ERA</th>
+              <th>WHIP</th>
+              <th>K</th>
+              <th>IP</th>
             </tr>
           </thead>
           <tbody id="player-stats-body">
             <tr>
-              <td colspan="2" style="text-align: center; padding: 20px; color: var(--muted);">Loading player stats...</td>
+              <td colspan="17" style="text-align: center; padding: 20px; color: var(--muted);">Loading player stats...</td>
             </tr>
           </tbody>
         </table>
@@ -788,14 +804,26 @@
             if (a.type === 'hitting') return (Number(b.stats.atBats || 0) - Number(a.stats.atBats || 0));
             return (Number(b.stats.gamesStarted || 0) - Number(a.stats.gamesStarted || 0));
           }).map(player => {
-            const title = `<div class="player-name"><strong>${player.name}</strong><span class="player-pos">${player.position}</span></div>`;
-            const statLine = player.type === 'hitting'
-              ? formatHittingStats(player.stats)
-              : formatPitchingStats(player.stats);
+            const hitting = player.type === 'hitting';
             return `
               <tr>
-                <td>${title}</td>
-                <td><div class="player-stat-line">${statLine}</div></td>
+                <td><strong>${player.name}</strong></td>
+                <td>${player.position}</td>
+                <td>${player.type}</td>
+                <td>${hitting ? player.stats.atBats || 0 : '—'}</td>
+                <td>${hitting ? player.stats.hits || 0 : '—'}</td>
+                <td>${hitting ? player.stats.avg || '—' : '—'}</td>
+                <td>${hitting ? player.stats.obp || '—' : '—'}</td>
+                <td>${hitting ? player.stats.slg || '—' : '—'}</td>
+                <td>${hitting ? player.stats.ops || '—' : '—'}</td>
+                <td>${hitting ? player.stats.homeRuns || 0 : '—'}</td>
+                <td>${hitting ? player.stats.rbi || 0 : '—'}</td>
+                <td>${!hitting ? player.stats.gamesStarted || 0 : '—'}</td>
+                <td>${!hitting ? `${player.stats.wins || 0}-${player.stats.losses || 0}` : '—'}</td>
+                <td>${!hitting ? player.stats.era || '—' : '—'}</td>
+                <td>${!hitting ? player.stats.whip || '—' : '—'}</td>
+                <td>${!hitting ? player.stats.strikeOuts || player.stats.strikeouts || 0 : '—'}</td>
+                <td>${!hitting ? player.stats.inningsPitched || '0.0' : '—'}</td>
               </tr>
             `;
           }).join('');
