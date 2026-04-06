@@ -365,32 +365,9 @@
     <!-- News -->
     <div class="card" style="margin-bottom:14px">
       <div class="card-hdr">📰 Latest News</div>
-
-      <a class="news" href="https://nypost.com/2026/03/26/sports/mets-vs-pirates-live-updates-mlb-opening-day-2026-scores-news-and-highlights/" target="_blank" rel="noopener">
-        <div class="news-src">NY Post</div>
-        <div class="news-hed">Mets jump on Paul Skenes early in dominant 11–7 Opening Day win</div>
-      </a>
-
-      <a class="news" href="https://www.cbsnews.com/newyork/news/mets-game-opening-day-2026-ny-mlb/" target="_blank" rel="noopener">
-        <div class="news-src">CBS New York</div>
-        <div class="news-hed">Mets take on Pirates in 2026 home opener at Citi Field</div>
-      </a>
-
-      <a class="news" href="https://www.northjersey.com/story/sports/mlb/mets/2026/03/26/ny-mets-pirates-score-live-updates-highlights-opening-day-2026/89288837007/" target="_blank" rel="noopener">
-        <div class="news-src">NorthJersey.com</div>
-        <div class="news-hed">NY Mets vs Pirates score &amp; highlights from Opening Day 2026</div>
-      </a>
-
-      <a class="news" href="https://www.nbcsports.com/mlb/live/2026-mlb-opening-day-live-updates-scores-results-highlights-including-mets-vs-pirates-dodgers-vs-d-backs" target="_blank" rel="noopener">
-        <div class="news-src">NBC Sports</div>
-        <div class="news-hed">2026 MLB Opening Day live updates: Mets vs Pirates highlights</div>
-      </a>
-
-      <a class="news" href="https://www.nbcnewyork.com/news/local/check-out-the-new-york-mets-full-2026-mlb-schedule/6481647/" target="_blank" rel="noopener">
-        <div class="news-src">NBC New York</div>
-        <div class="news-hed">New York Mets full 2026 MLB schedule</div>
-      </a>
-
+      <div id="news-container">
+        <div class="feed-loading">Loading latest news…</div>
+      </div>
     </div>
 
     <!-- Season Snapshot -->
@@ -427,6 +404,8 @@
 
       // Current season
       const CURRENT_SEASON = 2026;
+      const NEWS_JSON_PATH = 'news.json';
+      const NEWS_REFRESH_MS = 20 * 60 * 1000;
 
       async function fetchMetsData() {
         try {
@@ -702,7 +681,7 @@
             snapshotRows[4].innerHTML = `<span>Runs Allowed</span><strong>${metsRecord.runsAllowed}</strong>`;
             snapshotRows[5].innerHTML = `<span>Run Diff</span><strong style="color:${metsRecord.runDifferential >= 0 ? 'var(--win)' : 'var(--loss)'}">${metsRecord.runDifferential >= 0 ? '+' : ''}${metsRecord.runDifferential}</strong>`;
             snapshotRows[6].innerHTML = `<span>Streak</span><strong style="color:${metsRecord.streak.streakType === 'wins' ? 'var(--win)' : 'var(--loss)'}">${metsRecord.streak.streakCode}</strong>`;
-            snapshotRows[7].innerHTML = `<span>Extra Innings</span><strong>${extraInningGames}–${extraInningGames}</strong>`;
+            snapshotRows[7].innerHTML = `<span>Extra Innings</span><strong>${extraInningGames}</strong>`;
             snapshotRows[8].innerHTML = `<span>Home</span><strong>${homeWins}–${homeLosses}</strong>`;
             snapshotRows[9].innerHTML = `<span>Away</span><strong>${awayWins}–${awayLosses}</strong>`;
           }
@@ -724,8 +703,45 @@
         return 'th';
       }
 
+      async function loadNews() {
+        const newsContainer = document.getElementById('news-container');
+        if (!newsContainer) return;
+
+        newsContainer.innerHTML = '<div class="feed-loading">Loading latest news…</div>';
+
+        try {
+          const response = await fetch(`${NEWS_JSON_PATH}?t=${Date.now()}`);
+          if (!response.ok) throw new Error('Failed to fetch news');
+          const newsItems = await response.json();
+
+          if (!Array.isArray(newsItems) || newsItems.length === 0) {
+            newsContainer.innerHTML = '<div class="feed-error">No news available right now.</div>';
+            return;
+          }
+
+          newsContainer.innerHTML = newsItems.slice(0, 5).map(item => {
+            const source = item.source || 'MLB.com';
+            const title = item.title || 'Latest Mets update';
+            const url = item.url || '#';
+            return `
+              <a class="news" href="${url}" target="_blank" rel="noopener">
+                <div class="news-src">${source}</div>
+                <div class="news-hed">${title}</div>
+              </a>
+            `;
+          }).join('');
+        } catch (error) {
+          console.error('Error loading news:', error);
+          newsContainer.innerHTML = '<div class="feed-error">Unable to load latest news. Try again in a few minutes.</div>';
+        }
+      }
+
       // Load data when page loads
-      document.addEventListener('DOMContentLoaded', fetchMetsData);
+      document.addEventListener('DOMContentLoaded', () => {
+        fetchMetsData();
+        loadNews();
+        setInterval(loadNews, NEWS_REFRESH_MS);
+      });
     </script>
 
   </div><!-- /right -->
@@ -733,7 +749,7 @@
 </div><!-- /wrap -->
 
 <footer>
-  <p>Met Monitor · Data via <a href="https://statsapi.mlb.com" target="_blank" rel="noopener">MLB Stats API</a> &amp; MLB.com</p>
+  <p>Met Monitor · Data via <a href="https://statsapi.mlb.com" target="_blank" rel="noopener">MLB Stats API</a> &amp; MLB.com · News refreshes every 20 minutes</p>
   <p style="margin-top:4px">⚾ Let's Go Mets!</p>
 </footer>
 
