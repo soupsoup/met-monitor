@@ -803,6 +803,8 @@ const hittingBody = document.getElementById('player-hitting-stats-body');
             position = 'DH';
           } else if (name.includes('Polanco')) {
             position = '1B';
+          } else if (name.includes('Soto')) {
+            position = 'LF';
           }
 
           return {
@@ -817,6 +819,7 @@ const hittingBody = document.getElementById('player-hitting-stats-body');
         const playerStats = await Promise.all(statsPromises);
 
         const hittingPlayers = playerStats.filter(player => {
+          if (player.name.includes('Soto')) return true;
           if (!player.stats || player.type !== 'hitting') return false;
           return Number(player.stats.atBats || 0) >= STATS_THRESHOLDS.hitting.atBats;
         });
