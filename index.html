@@ -488,6 +488,21 @@
         });
       }
 
+      function getTeamDisplayName(team) {
+        return team.teamName || team.name || 'Opponent';
+      }
+
+      function getTeamAbbreviation(team) {
+        if (team.abbreviation) return team.abbreviation;
+        if (team.teamCode) return team.teamCode.toUpperCase();
+        const name = team.teamName || team.name || '';
+        const words = name.split(' ').filter(Boolean);
+        if (words.length === 0) return '---';
+        if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
+        const abbr = words.map(w => w[0]).join('').toUpperCase();
+        return abbr.slice(0, 3);
+      }
+
       function updateNextGame(scheduleData) {
         const dates = scheduleData.dates || [];
         const today = new Date().toISOString().split('T')[0];
@@ -514,6 +529,8 @@
           const gameDate = new Date(nextGame.gameDate);
           const dateStr = gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           const timeStr = gameDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          const opponentName = getTeamDisplayName(opponent);
+          const opponentAbbr = getTeamAbbreviation(opponent);
 
           // Update next game section
           const matchupDiv = document.querySelector('.matchup');
@@ -525,8 +542,8 @@
               </div>
               <div class="vs">${isHome ? 'vs' : '@'}</div>
               <div class="t-chip">
-                <div class="t-abbr grey">${opponent.abbreviation}</div>
-                <div class="t-name">${opponent.teamName}</div>
+                <div class="t-abbr grey">${opponentAbbr}</div>
+                <div class="t-name">${opponentName}</div>
               </div>
             `;
           }
@@ -572,6 +589,8 @@
               const metsScore = isHome ? game.teams.home.score : game.teams.away.score;
               const oppScore = isHome ? game.teams.away.score : game.teams.home.score;
               const opponent = isHome ? game.teams.away.team : game.teams.home.team;
+              const opponentName = getTeamDisplayName(opponent);
+              const opponentAbbr = getTeamAbbreviation(opponent);
               const isWin = (isHome && metsScore > oppScore) || (!isHome && metsScore > oppScore);
               const gameDate = new Date(game.officialDate);
               const dateStr = gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -581,11 +600,11 @@
                 <div class="g-row">
                   <div class="dot ${isWin ? 'W' : 'L'}">${isWin ? 'W' : 'L'}</div>
                   <div class="g-info">
-                    <div class="g-opp">${isHome ? 'vs' : '@'} ${opponent.teamName}</div>
+                    <div class="g-opp">${isHome ? 'vs' : '@'} ${opponentName}</div>
                     <div class="g-date">${dateStr} · ${venue}</div>
                   </div>
                   <div class="g-score">
-                    <strong>NYM ${metsScore} – ${opponent.abbreviation} ${oppScore}</strong>
+                    <strong>NYM ${metsScore} – ${opponentAbbr} ${oppScore}</strong>
                     <small>${game.status.detailedState}</small>
                   </div>
                 </div>
@@ -614,10 +633,12 @@
               const isMets = team.team.id === METS_TEAM_ID;
               const hasWildcard = team.hasWildcard;
               const wcBadge = hasWildcard ? '<span class="wc">WC</span>' : '';
+              const fullName = team.team.name || '';
+              const shortName = fullName.split(' ').slice(-1)[0] || fullName;
 
               html += `
                 <tr class="${isMets ? 'mets' : ''}">
-                  <td>${team.team.name.split(' ')[1]}${wcBadge}</td>
+                  <td>${shortName}${wcBadge}</td>
                   <td>${team.wins}</td>
                   <td>${team.losses}</td>
                   <td class="pct">${team.winningPercentage}</td>
