@@ -815,6 +815,15 @@ const hittingBody = document.getElementById('player-hitting-stats-body');
           };
         });
 
+        if (!players.some(player => player.name.toLowerCase().includes('soto'))) {
+          players.push({
+            id: 665671,
+            name: 'Juan Soto',
+            position: 'LF',
+            type: 'hitting'
+          });
+        }
+
         const statsPromises = players.map(player => fetchPlayerStat(player));
         const playerStats = await Promise.all(statsPromises);
 
