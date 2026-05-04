@@ -1,8 +1,18 @@
 [
   {
     "source": "MLB.com",
+    "title": "What we've learned about the 2026 Mets so far",
+    "url": "https://www.mlb.com/mets/news/whats-going-wrong-with-2026-mets"
+  },
+  {
+    "source": "MLB.com",
     "title": "Holmes 'on another level' with 1.69 ERA in ace-like start to '26",
     "url": "https://www.mlb.com/mets/news/clay-holmes-earns-fourth-win-mets-win-series-vs-angels"
+  },
+  {
+    "source": "MLB.com",
+    "title": "Price drop to stream Mets games through the MLB App",
+    "url": "https://www.mlb.com/mets/news/sny-mets-mlb-2026-stream"
   },
   {
     "source": "MLB.com",
@@ -11,17 +21,7 @@
   },
   {
     "source": "MLB.com",
-    "title": "Stream Mets games through the MLB App",
-    "url": "https://www.mlb.com/mets/news/sny-mets-mlb-2026-stream"
-  },
-  {
-    "source": "MLB.com",
     "title": "Monday's Mets-Rockies game time changed to 5:40 p.m. ET",
     "url": "https://www.mlb.com/mets/news/mets-rockies-monday-game-time-change"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Mauricio likely out 6-8 weeks after fracturing left thumb",
-    "url": "https://www.mlb.com/mets/news/ronny-mauricio-fractured-left-thumb-injury"
   }
 ]
