@@ -1,18 +1,8 @@
 [
   {
     "source": "MLB.com",
-    "title": "Subway Series kicks off with tantalizing Schlittler-Holmes faceoff",
-    "url": "https://www.mlb.com/mets/news/cam-schlittler-clay-holmes-start-in-subway-series"
-  },
-  {
-    "source": "MLB.com",
     "title": "With Alvarez on the shelf, Torrens with another chance to prove himself",
     "url": "https://www.mlb.com/mets/news/luis-torrens-to-get-chance-at-catcher-with-francisco-alvarez-injured"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Price drop to stream Mets games through the MLB App",
-    "url": "https://www.mlb.com/mets/news/sny-mets-mlb-2026-stream"
   },
   {
     "source": "MLB.com",
@@ -21,7 +11,17 @@
   },
   {
     "source": "MLB.com",
+    "title": "Price drop to stream Mets games through the MLB App",
+    "url": "https://www.mlb.com/mets/news/sny-mets-mlb-2026-stream"
+  },
+  {
+    "source": "MLB.com",
     "title": "Mets phenom Ewing scoffs at power grade, goes 405 feet for 1st HR",
     "url": "https://www.mlb.com/mets/news/a-j-ewing-first-career-home-run"
+  },
+  {
+    "source": "MLB.com",
+    "title": "Lindor (calf) seeing 'signs of healing,' but still not close to return",
+    "url": "https://www.mlb.com/mets/news/francisco-lindor-receives-update-on-injured-calf"
   }
 ]
