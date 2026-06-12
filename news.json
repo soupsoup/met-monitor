@@ -1,18 +1,8 @@
 [
   {
     "source": "MLB.com",
-    "title": "Inspired by Knicks across town, Soto comes through in clutch",
-    "url": "https://www.mlb.com/mets/news/juan-soto-homer-lifts-mets-to-win-over-cardinals"
-  },
-  {
-    "source": "MLB.com",
-    "title": "After injury setback, Senga hurls quality start in 4th rehab outing",
-    "url": "https://www.mlb.com/mets/news/kodai-senga-sharp-in-double-a-rehab-start"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Price drop to stream Mets games through the MLB App",
-    "url": "https://www.mlb.com/mets/news/sny-mets-mlb-2026-stream"
+    "title": "Alvarez's return a bright spot amid Mets injury woes",
+    "url": "https://www.mlb.com/mets/news/francisco-alvarez-returns-from-il-as-mets-battle-injuries"
   },
   {
     "source": "MLB.com",
@@ -21,7 +11,17 @@
   },
   {
     "source": "MLB.com",
-    "title": "The Draft is one month away! Check out our latest mock",
-    "url": "https://www.mlb.com/mets/news/mlb-pipeline-2026-mock-draft-june-11"
+    "title": "Price drop to stream Mets games through the MLB App",
+    "url": "https://www.mlb.com/mets/news/sny-mets-mlb-2026-stream"
+  },
+  {
+    "source": "MLB.com",
+    "title": "Inspired by Knicks across town, Soto comes through in clutch",
+    "url": "https://www.mlb.com/mets/news/juan-soto-homer-lifts-mets-to-win-over-cardinals"
+  },
+  {
+    "source": "MLB.com",
+    "title": "After injury setback, Senga hurls quality start in 4th rehab outing",
+    "url": "https://www.mlb.com/mets/news/kodai-senga-sharp-in-double-a-rehab-start"
   }
 ]
