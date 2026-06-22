@@ -1,13 +1,18 @@
 [
   {
     "source": "MLB.com",
+    "title": "Peterson falters again as Mets face tough decision on rotation's path forward",
+    "url": "https://www.mlb.com/mets/news/david-peterson-struggles-as-mets-lose-series-vs-phillies"
+  },
+  {
+    "source": "MLB.com",
     "title": "Lindor targeting return to Mets this week after 2nd Triple-A rehab game Sunday",
     "url": "https://www.mlb.com/mets/news/francisco-lindor-nearing-return-for-mets-after-triple-a-rehab"
   },
   {
     "source": "MLB.com",
-    "title": "LAST CHANCE for Father's Day Sale -- Get SNY for $44.99",
-    "url": "https://www.mlb.com/mets/news/sny-mlb-father-s-day-2026-sale"
+    "title": "Stream Mets games through the MLB App",
+    "url": "https://www.mlb.com/mets/news/sny-mets-mlb-2026-stream"
   },
   {
     "source": "MLB.com",
@@ -18,10 +23,5 @@
     "source": "MLB.com",
     "title": "Here's how Weaver turned his season around in May",
     "url": "https://www.mlb.com/mets/news/luke-weaver-dominant-for-mets-since-may"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Lindor singles, scores in first rehab appearance, slated for more game action Sunday",
-    "url": "https://www.mlb.com/mets/news/francisco-lindor-plays-first-rehab-game"
   }
 ]
