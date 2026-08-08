@@ -264,34 +264,34 @@
     .snap-row span:first-child { color: var(--muted); }
     .snap-row strong { font-weight: 700; }
 
-    /* ── X Feed ── */
-    .tweet-list { list-style: none; }
+    /* ── Social Feed ── */
+    .social-list { list-style: none; }
 
-    .tweet-item {
+    .social-item {
       padding: 12px 14px;
       border-bottom: 1px solid var(--border);
       font-size: 0.83rem;
       line-height: 1.45;
     }
-    .tweet-item:last-child { border-bottom: none; }
+    .social-item:last-child { border-bottom: none; }
 
-    .tweet-author {
+    .social-author {
       font-weight: 700;
       color: var(--blue);
       font-size: 0.8rem;
       margin-bottom: 3px;
     }
 
-    .tweet-handle {
+    .social-handle {
       font-weight: 400;
       color: var(--muted);
       font-size: 0.73rem;
       margin-left: 4px;
     }
 
-    .tweet-text { color: #1a1a2e; word-break: break-word; }
+    .social-text { color: #1a1a2e; word-break: break-word; }
 
-    .tweet-time {
+    .social-time {
       font-size: 0.68rem;
       color: var(--muted);
       margin-top: 5px;
@@ -460,11 +460,11 @@
       </div>
     </div>
 
-    <!-- X / Twitter Feed — reads from tweets.json, updated daily by GitHub Actions -->
+    <!-- Bluesky Feed -->
     <div class="card">
-      <div class="card-hdr">🐦 Mets Feed</div>
-      <div id="tweet-container">
-        <div class="feed-loading">Loading tweets…</div>
+      <div class="card-hdr">🐦 Mets Bluesky Feed</div>
+      <div id="social-container">
+        <div class="feed-loading">Loading Bluesky posts…</div>
       </div>
     </div>
 
@@ -479,6 +479,12 @@
       const CURRENT_SEASON = 2026;
       const NEWS_JSON_PATH = 'news.json';
       const NEWS_REFRESH_MS = 20 * 60 * 1000;
+      const BLUESKY_API_BASE = 'https://public.api.bsky.app/xrpc';
+      const BLUESKY_SOURCES = [
+        { handle: 'mets.com', label: 'New York Mets' },
+        { handle: 'mrsmetofficial.bsky.social', label: 'Mrs. Met' }
+      ];
+      const BLUESKY_REFRESH_MS = 30 * 60 * 1000;
       const STATS_THRESHOLDS = {
         hitting: { atBats: 30 },
         pitching: { gamesStarted: 2 }
@@ -780,6 +786,91 @@
         return 'th';
       }
 
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function linkifyText(text) {
+        return escapeHtml(text).replace(/(https?:\/\/[^\s<]+)/g, url =>
+          `<a href="${url}" target="_blank" rel="noopener">${url}</a>`
+        );
+      }
+
+      function formatBlueskyTime(isoString) {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        if (Number.isNaN(date.getTime())) return '';
+        return date.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit'
+        });
+      }
+
+      async function resolveBlueskyHandle(handle) {
+        const response = await fetch(`${BLUESKY_API_BASE}/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(handle)}`);
+        if (!response.ok) throw new Error(`Failed to resolve ${handle}`);
+        const data = await response.json();
+        if (!data.did) throw new Error(`No DID returned for ${handle}`);
+        return data.did;
+      }
+
+      async function fetchBlueskyAuthorFeed(source) {
+        const did = await resolveBlueskyHandle(source.handle);
+        const response = await fetch(`${BLUESKY_API_BASE}/app.bsky.feed.getAuthorFeed?actor=${encodeURIComponent(did)}&limit=12`);
+        if (!response.ok) throw new Error(`Failed to fetch feed for ${source.handle}`);
+        const data = await response.json();
+
+        return (data.feed || []).map(item => ({
+          author: source.label,
+          handle: source.handle,
+          text: item.post?.record?.text || '',
+          createdAt: item.post?.record?.createdAt || item.post?.indexedAt || '',
+          url: item.post?.uri ? `https://bsky.app/profile/${source.handle}/post/${item.post.uri.split('/').pop()}` : `https://bsky.app/profile/${source.handle}`
+        }));
+      }
+
+      async function loadBlueskyFeed() {
+        const socialContainer = document.getElementById('social-container');
+        if (!socialContainer) return;
+
+        socialContainer.innerHTML = '<div class="feed-loading">Loading Bluesky posts…</div>';
+
+        try {
+          const feedSets = await Promise.allSettled(BLUESKY_SOURCES.map(fetchBlueskyAuthorFeed));
+          const posts = feedSets
+            .flatMap(result => result.status === 'fulfilled' ? result.value : [])
+            .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+            .slice(0, 8);
+
+          if (posts.length === 0) {
+            socialContainer.innerHTML = '<div class="feed-error">No Bluesky posts available right now.</div>';
+            return;
+          }
+
+          socialContainer.innerHTML = `
+            <div class="social-list">
+              ${posts.map(post => `
+                <a class="social-item" href="${post.url}" target="_blank" rel="noopener">
+                  <div class="social-author">${escapeHtml(post.author)}<span class="social-handle"> @${escapeHtml(post.handle)}</span></div>
+                  <div class="social-text">${linkifyText(post.text)}</div>
+                  <div class="social-time">${escapeHtml(formatBlueskyTime(post.createdAt))}</div>
+                </a>
+              `).join('')}
+            </div>
+          `;
+        } catch (error) {
+          console.error('Error loading Bluesky feed:', error);
+          socialContainer.innerHTML = '<div class="feed-error">Unable to load Bluesky posts. Try again in a few minutes.</div>';
+        }
+      }
+
       async function fetchPlayerStats() {
 const hittingBody = document.getElementById('player-hitting-stats-body');
       const pitchingBody = document.getElementById('player-pitching-stats-body');
@@ -941,7 +1032,9 @@ const hittingBody = document.getElementById('player-hitting-stats-body');
         fetchMetsData();
         fetchPlayerStats();
         loadNews();
+        loadBlueskyFeed();
         setInterval(loadNews, NEWS_REFRESH_MS);
+        setInterval(loadBlueskyFeed, BLUESKY_REFRESH_MS);
       });
     </script>
 
@@ -950,7 +1043,7 @@ const hittingBody = document.getElementById('player-hitting-stats-body');
 </div><!-- /wrap -->
 
 <footer>
-  <p>Met Monitor · Data via <a href="https://statsapi.mlb.com" target="_blank" rel="noopener">MLB Stats API</a> &amp; MLB.com · News refreshes every 20 minutes</p>
+  <p>Met Monitor · Data via <a href="https://statsapi.mlb.com" target="_blank" rel="noopener">MLB Stats API</a> &amp; MLB.com · News refreshes every 20 minutes · Bluesky refreshes every 30 minutes</p>
   <p style="margin-top:4px">⚾ Let's Go Mets!</p>
 </footer>
 
