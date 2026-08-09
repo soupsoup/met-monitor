@@ -265,36 +265,123 @@
     .snap-row strong { font-weight: 700; }
 
     /* ── Social Feed ── */
-    .social-list { list-style: none; }
+    .social-list { list-style: none; padding: 6px 0; }
 
     .social-item {
-      padding: 12px 14px;
+      display: block;
+      padding: 14px 14px 12px;
       border-bottom: 1px solid var(--border);
-      font-size: 0.83rem;
-      line-height: 1.45;
+      text-decoration: none;
+      color: inherit;
+      background: #fff;
     }
+    .social-item:hover { background: #fafcff; }
     .social-item:last-child { border-bottom: none; }
 
-    .social-author {
-      font-weight: 700;
+    .social-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .social-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex: 0 0 36px;
+      background: linear-gradient(135deg, #e9f1ff 0%, #cfe0ff 100%);
+      border: 1px solid #d8e4fb;
       color: var(--blue);
-      font-size: 0.8rem;
-      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      overflow: hidden;
+    }
+
+    .social-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .social-meta {
+      min-width: 0;
+      flex: 1;
+      line-height: 1.2;
+    }
+
+    .social-author {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-weight: 800;
+      color: #0f172a;
+      font-size: 0.88rem;
+      flex-wrap: wrap;
     }
 
     .social-handle {
-      font-weight: 400;
+      font-weight: 500;
       color: var(--muted);
-      font-size: 0.73rem;
-      margin-left: 4px;
+      font-size: 0.76rem;
     }
 
-    .social-text { color: #1a1a2e; word-break: break-word; }
-
     .social-time {
-      font-size: 0.68rem;
+      margin-top: 2px;
+      font-size: 0.7rem;
       color: var(--muted);
-      margin-top: 5px;
+    }
+
+    .social-text {
+      color: #0f172a;
+      word-break: break-word;
+      white-space: pre-wrap;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      padding-left: 46px;
+      margin-top: -2px;
+    }
+
+    .social-text a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .social-text a:hover { text-decoration: underline; }
+
+    .social-footer {
+      display: flex;
+      gap: 14px;
+      padding-left: 46px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .social-stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .social-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      background: #eef5ff;
+      color: var(--blue);
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      margin-top: 4px;
     }
 
     .feed-loading {
@@ -813,6 +900,18 @@
         });
       }
 
+      function getAvatarLabel(source) {
+        const label = source.label || source.handle || 'M';
+        return label
+          .split(/\s+/)
+          .filter(Boolean)
+          .slice(0, 2)
+          .map(part => part[0])
+          .join('')
+          .toUpperCase()
+          .slice(0, 2);
+      }
+
       async function resolveBlueskyHandle(handle) {
         const response = await fetch(`${BLUESKY_API_BASE}/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(handle)}`);
         if (!response.ok) throw new Error(`Failed to resolve ${handle}`);
@@ -832,7 +931,11 @@
           handle: source.handle,
           text: item.post?.record?.text || '',
           createdAt: item.post?.record?.createdAt || item.post?.indexedAt || '',
-          url: item.post?.uri ? `https://bsky.app/profile/${source.handle}/post/${item.post.uri.split('/').pop()}` : `https://bsky.app/profile/${source.handle}`
+          url: item.post?.uri ? `https://bsky.app/profile/${source.handle}/post/${item.post.uri.split('/').pop()}` : `https://bsky.app/profile/${source.handle}`,
+          replyCount: item.post?.replyCount ?? 0,
+          repostCount: item.post?.repostCount ?? 0,
+          likeCount: item.post?.likeCount ?? 0,
+          avatarLabel: getAvatarLabel(source)
         }));
       }
 
@@ -858,9 +961,20 @@
             <div class="social-list">
               ${posts.map(post => `
                 <a class="social-item" href="${post.url}" target="_blank" rel="noopener">
-                  <div class="social-author">${escapeHtml(post.author)}<span class="social-handle"> @${escapeHtml(post.handle)}</span></div>
+                  <div class="social-top">
+                    <div class="social-avatar">${escapeHtml(post.avatarLabel)}</div>
+                    <div class="social-meta">
+                      <div class="social-author">${escapeHtml(post.author)}<span class="social-handle">@${escapeHtml(post.handle)}</span></div>
+                      <div class="social-time">${escapeHtml(formatBlueskyTime(post.createdAt))}</div>
+                    </div>
+                  </div>
                   <div class="social-text">${linkifyText(post.text)}</div>
-                  <div class="social-time">${escapeHtml(formatBlueskyTime(post.createdAt))}</div>
+                  <div class="social-badge">🟦 Bluesky</div>
+                  <div class="social-footer">
+                    <span class="social-stat">💬 ${post.replyCount}</span>
+                    <span class="social-stat">🔁 ${post.repostCount}</span>
+                    <span class="social-stat">♥ ${post.likeCount}</span>
+                  </div>
                 </a>
               `).join('')}
             </div>
