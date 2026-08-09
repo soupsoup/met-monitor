@@ -355,6 +355,76 @@
 
     .social-text a:hover { text-decoration: underline; }
 
+    .social-media {
+      margin: 10px 0 0 46px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #e5edf8;
+      background: #f8fbff;
+    }
+
+    .social-media-grid {
+      display: grid;
+      gap: 2px;
+      background: #e5edf8;
+    }
+
+    .social-media-grid.one { grid-template-columns: 1fr; }
+    .social-media-grid.two { grid-template-columns: repeat(2, 1fr); }
+    .social-media-grid.three,
+    .social-media-grid.four { grid-template-columns: repeat(2, 1fr); }
+
+    .social-media-item {
+      position: relative;
+      background: #eef4ff;
+      overflow: hidden;
+      aspect-ratio: 1 / 1;
+    }
+
+    .social-media-grid.one .social-media-item {
+      aspect-ratio: auto;
+      min-height: 240px;
+    }
+
+    .social-media-item img,
+    .social-video-thumb {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .social-media-item .play-pill {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      background: rgba(15, 23, 42, 0.82);
+      color: #fff;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 5px 9px;
+      letter-spacing: 0.02em;
+    }
+
+    .social-video {
+      display: block;
+      width: 100%;
+      background: #000;
+      aspect-ratio: 16 / 9;
+      margin: 10px 0 0 46px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #e5edf8;
+    }
+
+    .social-video video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #000;
+    }
+
     .social-footer {
       display: flex;
       gap: 14px;
@@ -900,6 +970,92 @@
         });
       }
 
+      function getBlobUrl(blob, did, scope = 'feed_fullsize') {
+        const link = blob?.ref?.$link || blob?.ref?.link || blob?.cid || blob?.id;
+        if (!link) return '';
+        const mimeType = blob?.mimeType || '';
+        const ext = mimeType.startsWith('image/') ? mimeType.split('/')[1].replace('jpeg', 'jpg') : '';
+        const suffix = ext ? `@${ext}` : '';
+        return did ? `https://cdn.bsky.app/img/${scope}/plain/${encodeURIComponent(did)}/${link}${suffix}` : '';
+      }
+
+      function getVideoUrl(videoBlob, did) {
+        const link = videoBlob?.ref?.$link || videoBlob?.ref?.link || videoBlob?.cid || videoBlob?.id;
+        if (!link || !did) return '';
+        return `https://video.bsky.app/watch/${encodeURIComponent(did)}/${link}`;
+      }
+
+      function renderImageMedia(images = [], did) {
+        if (!images.length) return '';
+        const countClass = images.length >= 4 ? 'four' : images.length === 3 ? 'three' : images.length === 2 ? 'two' : 'one';
+        return `
+          <div class="social-media">
+            <div class="social-media-grid ${countClass}">
+              ${images.slice(0, 4).map(image => {
+                const url = getBlobUrl(image.image, did);
+                const alt = image.alt || '';
+                if (!url) return '';
+                return `
+                  <div class="social-media-item">
+                    <img src="${url}" alt="${escapeHtml(alt)}" loading="lazy" />
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderVideoMedia(embed, did) {
+        const blob = embed?.video || embed?.media?.video || null;
+        const posterBlob = embed?.thumbnail || embed?.media?.thumbnail || null;
+        const videoUrl = getVideoUrl(blob, did);
+        const posterUrl = getBlobUrl(posterBlob, did);
+
+        if (!videoUrl && !posterUrl) return '';
+
+        return `
+          <div class="social-video">
+            <video controls playsinline ${posterUrl ? `poster="${posterUrl}"` : ''}>
+              ${videoUrl ? `<source src="${videoUrl}">` : ''}
+              Sorry, your browser cannot play this video.
+            </video>
+          </div>
+        `;
+      }
+
+      function renderPostMedia(embed, did) {
+        if (!embed || !embed.$type) return '';
+
+        if (embed.$type === 'app.bsky.embed.images') {
+          return renderImageMedia(embed.images || [], did);
+        }
+
+        if (embed.$type === 'app.bsky.embed.video') {
+          return renderVideoMedia(embed, did);
+        }
+
+        if (embed.$type === 'app.bsky.embed.recordWithMedia') {
+          return renderPostMedia(embed.media, did);
+        }
+
+        if (embed.$type === 'app.bsky.embed.external') {
+          const thumbUrl = getBlobUrl(embed.external?.thumb, did);
+          if (!thumbUrl) return '';
+          return `
+            <div class="social-media">
+              <div class="social-media-grid one">
+                <div class="social-media-item">
+                  <img src="${thumbUrl}" alt="${escapeHtml(embed.external?.title || '')}" loading="lazy" />
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        return '';
+      }
+
       function getAvatarLabel(source) {
         const label = source.label || source.handle || 'M';
         return label
@@ -931,6 +1087,8 @@
           handle: source.handle,
           text: item.post?.record?.text || '',
           createdAt: item.post?.record?.createdAt || item.post?.indexedAt || '',
+          embed: item.post?.embed || null,
+          did,
           url: item.post?.uri ? `https://bsky.app/profile/${source.handle}/post/${item.post.uri.split('/').pop()}` : `https://bsky.app/profile/${source.handle}`,
           replyCount: item.post?.replyCount ?? 0,
           repostCount: item.post?.repostCount ?? 0,
@@ -969,6 +1127,7 @@
                     </div>
                   </div>
                   <div class="social-text">${linkifyText(post.text)}</div>
+                  ${renderPostMedia(post.embed, post.did)}
                   <div class="social-badge">🟦 Bluesky</div>
                   <div class="social-footer">
                     <span class="social-stat">💬 ${post.replyCount}</span>
