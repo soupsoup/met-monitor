@@ -971,15 +971,23 @@
       }
 
       function getBlobUrl(blob, did, scope = 'feed_fullsize') {
+        if (!blob) return '';
+        if (typeof blob === 'string') return blob;
+        const directUrl = blob.fullsize || blob.thumb || blob.url || blob.src || '';
+        if (directUrl) return directUrl;
         const link = blob?.ref?.$link || blob?.ref?.link || blob?.cid || blob?.id;
-        if (!link) return '';
+        if (!link || !did) return '';
         const mimeType = blob?.mimeType || '';
         const ext = mimeType.startsWith('image/') ? mimeType.split('/')[1].replace('jpeg', 'jpg') : '';
         const suffix = ext ? `@${ext}` : '';
-        return did ? `https://cdn.bsky.app/img/${scope}/plain/${encodeURIComponent(did)}/${link}${suffix}` : '';
+        return `https://cdn.bsky.app/img/${scope}/plain/${encodeURIComponent(did)}/${link}${suffix}`;
       }
 
       function getVideoUrl(videoBlob, did) {
+        if (!videoBlob) return '';
+        if (typeof videoBlob === 'string') return videoBlob;
+        const directUrl = videoBlob.playlist || videoBlob.url || videoBlob.src || '';
+        if (directUrl) return directUrl;
         const link = videoBlob?.ref?.$link || videoBlob?.ref?.link || videoBlob?.cid || videoBlob?.id;
         if (!link || !did) return '';
         return `https://video.bsky.app/watch/${encodeURIComponent(did)}/${link}`;
@@ -992,7 +1000,7 @@
           <div class="social-media">
             <div class="social-media-grid ${countClass}">
               ${images.slice(0, 4).map(image => {
-                const url = getBlobUrl(image.image, did);
+                const url = getBlobUrl(image.fullsize || image.thumb || image.image, did);
                 const alt = image.alt || '';
                 if (!url) return '';
                 return `
@@ -1008,39 +1016,54 @@
 
       function renderVideoMedia(embed, did) {
         const blob = embed?.video || embed?.media?.video || null;
-        const posterBlob = embed?.thumbnail || embed?.media?.thumbnail || null;
+        const posterBlob = embed?.thumbnail || embed?.media?.thumbnail || embed?.thumb || null;
         const videoUrl = getVideoUrl(blob, did);
         const posterUrl = getBlobUrl(posterBlob, did);
 
-        if (!videoUrl && !posterUrl) return '';
+        if (videoUrl) {
+          return `
+            <div class="social-video">
+              <video controls playsinline ${posterUrl ? `poster="${posterUrl}"` : ''}>
+                <source src="${videoUrl}">
+                Sorry, your browser cannot play this video.
+              </video>
+            </div>
+          `;
+        }
 
-        return `
-          <div class="social-video">
-            <video controls playsinline ${posterUrl ? `poster="${posterUrl}"` : ''}>
-              ${videoUrl ? `<source src="${videoUrl}">` : ''}
-              Sorry, your browser cannot play this video.
-            </video>
-          </div>
-        `;
+        if (posterUrl) {
+          return `
+            <div class="social-media">
+              <div class="social-media-grid one">
+                <div class="social-media-item">
+                  <img src="${posterUrl}" alt="Video preview" loading="lazy" />
+                  <span class="play-pill">Video</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        return '';
       }
 
       function renderPostMedia(embed, did) {
         if (!embed || !embed.$type) return '';
 
-        if (embed.$type === 'app.bsky.embed.images') {
+        if (embed.$type === 'app.bsky.embed.images' || embed.$type === 'app.bsky.embed.images#view') {
           return renderImageMedia(embed.images || [], did);
         }
 
-        if (embed.$type === 'app.bsky.embed.video') {
+        if (embed.$type === 'app.bsky.embed.video' || embed.$type === 'app.bsky.embed.video#view') {
           return renderVideoMedia(embed, did);
         }
 
-        if (embed.$type === 'app.bsky.embed.recordWithMedia') {
+        if (embed.$type === 'app.bsky.embed.recordWithMedia' || embed.$type === 'app.bsky.embed.recordWithMedia#view') {
           return renderPostMedia(embed.media, did);
         }
 
-        if (embed.$type === 'app.bsky.embed.external') {
-          const thumbUrl = getBlobUrl(embed.external?.thumb, did);
+        if (embed.$type === 'app.bsky.embed.external' || embed.$type === 'app.bsky.embed.external#view') {
+          const thumbUrl = getBlobUrl(embed.external?.thumb || embed.thumb, did);
           if (!thumbUrl) return '';
           return `
             <div class="social-media">
