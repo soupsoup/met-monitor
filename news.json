@@ -1,6 +1,11 @@
 [
   {
     "source": "MLB.com",
+    "title": "Kodai Senga, closer? Here's why it could work",
+    "url": "https://www.mlb.com/mets/news/mets-kodai-senga-closer-statcast-analysis"
+  },
+  {
+    "source": "MLB.com",
     "title": "Benge emerging as NL Rookie of the Year contender",
     "url": "https://www.mlb.com/mets/news/carson-benge-building-case-for-2026-nl-rookie-of-the-year"
   },
@@ -18,10 +23,5 @@
     "source": "MLB.com",
     "title": "McLean fires 6 scoreless innings, handles bases-loaded jam with ease",
     "url": "https://www.mlb.com/mets/news/nolan-mclean-pitches-six-scoreless-innings-vs-white-sox"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Resilient Robert's HRs ring louder than boos in Chicago return",
-    "url": "https://www.mlb.com/mets/news/luis-robert-jr-hits-two-of-mets-five-home-runs-vs-white-sox"
   }
 ]
