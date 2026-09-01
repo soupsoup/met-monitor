@@ -1,6 +1,11 @@
 [
   {
     "source": "MLB.com",
+    "title": "Vientos returns with a bang to back career-best outing from Stock",
+    "url": "https://www.mlb.com/mets/news/mark-vientos-homers-in-return-as-mets-beat-rays"
+  },
+  {
+    "source": "MLB.com",
     "title": "Robert claimed by O's as Vientos returns from IL; Morabito to be called up",
     "url": "https://www.mlb.com/mets/news/luis-robert-jr-s-mets-tenure-ends-after-orioles-waiver-claim"
   },
@@ -18,10 +23,5 @@
     "source": "MLB.com",
     "title": "Mets' bullpen has rare August hiccup after Thornton's solid start",
     "url": "https://www.mlb.com/mets/news/mets-bullpen-go-ahead-runs-loss-astros"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Rehabbing Vientos hits 3 HRs in Mets' Triple-A no-hitter",
-    "url": "https://www.mlb.com/mets/news/mark-vientos-hits-3-home-runs-in-triple-a-rehab-game"
   }
 ]
