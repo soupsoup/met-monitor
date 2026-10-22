@@ -1,6 +1,11 @@
 [
   {
     "source": "MLB.com",
+    "title": "Each team's top performer from the 2026 Draft",
+    "url": "https://www.mlb.com/mets/news/2026-draft-top-performer-for-each-team"
+  },
+  {
+    "source": "MLB.com",
     "title": "Mets include Cubs' Mallee in coaching staff search (source)",
     "url": "https://www.mlb.com/mets/news/mets-to-interview-cubs-john-mallee-for-coaching-staff-role"
   },
@@ -18,10 +23,5 @@
     "source": "MLB.com",
     "title": "Here are MLB's 7 best 17-year-old prospects",
     "url": "https://www.mlb.com/mets/news/these-are-the-best-17-year-old-mlb-prospects"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Mets top-ranked prospect carries power surge into Winter League competition",
-    "url": "https://www.mlb.com/mets/news/mets-prospect-jefferson-rojas-homers-twice-in-winter-league"
   }
 ]
