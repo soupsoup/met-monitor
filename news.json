@@ -1,6 +1,11 @@
 [
   {
     "source": "MLB.com",
+    "title": "Bichette bypassing opt-out, returning to Mets for 2027 season (source)",
+    "url": "https://www.mlb.com/mets/news/bo-bichette-player-option-mets"
+  },
+  {
+    "source": "MLB.com",
     "title": "After watching his brother win World Series, Tylor Megill can take inspiration",
     "url": "https://www.mlb.com/mets/news/tylor-megill-inspired-by-world-series-champion-brother-trevor-megill"
   },
@@ -18,10 +23,5 @@
     "source": "MLB.com",
     "title": "These Mets made their case for recognition this awards season",
     "url": "https://www.mlb.com/mets/news/mets-players-in-contention-for-2026-mlb-awards"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Each team's top performer from the 2026 Draft",
-    "url": "https://www.mlb.com/mets/news/2026-draft-top-performer-for-each-team"
   }
 ]
