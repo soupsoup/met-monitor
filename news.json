@@ -1,6 +1,11 @@
 [
   {
     "source": "MLB.com",
+    "title": "LIVE on ESPN: Gold Glove Award winners being announced",
+    "url": "https://www.mlb.com/mets/news/2026-gold-glove-award-winners"
+  },
+  {
+    "source": "MLB.com",
     "title": "Koosman, iconic Mets southpaw who clinched '69 WS, passes away at 83",
     "url": "https://www.mlb.com/mets/news/jerry-koosman-passes-away-at-83"
   },
@@ -18,10 +23,5 @@
     "source": "MLB.com",
     "title": "Lindor wins 2026 Clemente Award, in spirit of his idol and countryman",
     "url": "https://www.mlb.com/mets/news/francisco-lindor-2026-clemente-award"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Mets set to add Mariano Duncan to coaching staff (source)",
-    "url": "https://www.mlb.com/mets/news/mariano-duncan-promoted-by-mets"
   }
 ]
