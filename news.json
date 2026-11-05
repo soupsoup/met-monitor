@@ -1,6 +1,11 @@
 [
   {
     "source": "MLB.com",
+    "title": "Mets adding Johnny Washington to staff as co-hitting coach (source)",
+    "url": "https://www.mlb.com/mets/news/johnny-washington-mets-co-hitting-coach"
+  },
+  {
+    "source": "MLB.com",
     "title": "Mets honored by BBWAA NY Chapter with multiple awards",
     "url": "https://www.mlb.com/mets/news/mets-honored-by-bbwaa-new-york-chapter"
   },
@@ -18,10 +23,5 @@
     "source": "MLB.com",
     "title": "Benge earns ROY finalist nod after all-around standout debut",
     "url": "https://www.mlb.com/mets/news/carson-benge-2026-rookie-of-the-year-finalist"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Breaking down the Fall Stars Game participants by organization",
-    "url": "https://www.mlb.com/mets/news/2026-arizona-fall-league-fall-stars-by-organization"
   }
 ]
