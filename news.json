@@ -1,6 +1,16 @@
 [
   {
     "source": "MLB.com",
+    "title": "Mets honored by BBWAA NY Chapter with multiple awards",
+    "url": "https://www.mlb.com/mets/news/mets-honored-by-bbwaa-new-york-chapter"
+  },
+  {
+    "source": "MLB.com",
+    "title": "Mets to honor Koosman with jersey patch in 2027",
+    "url": "https://www.mlb.com/mets/news/mets-to-wear-jerry-koosman-memorial-patch-in-2027"
+  },
+  {
+    "source": "MLB.com",
     "title": "4 big questions for Mets' rotation this offseason",
     "url": "https://www.mlb.com/mets/news/mets-rotation-offseason-questions-2026-2027"
   },
@@ -13,15 +23,5 @@
     "source": "MLB.com",
     "title": "Breaking down the Fall Stars Game participants by organization",
     "url": "https://www.mlb.com/mets/news/2026-arizona-fall-league-fall-stars-by-organization"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Mets claim righties Anderson, Ohl among flurry of roster moves",
-    "url": "https://www.mlb.com/mets/news/mets-claim-pitchers-jack-anderson-pierson-ohl-off-waivers"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Here are the rosters for Sunday's AFL Fall Stars Game",
-    "url": "https://www.mlb.com/mets/news/2026-arizona-fall-league-fall-stars-game-rosters"
   }
 ]
