@@ -1,6 +1,11 @@
 [
   {
     "source": "MLB.com",
+    "title": "Ewing agrees to 8-year, $95 million extension with Mets (source)",
+    "url": "https://www.mlb.com/mets/news/a-j-ewing-contract-extension-mets"
+  },
+  {
+    "source": "MLB.com",
     "title": "Mets tender 2027 contract to arb-eligible Vientos",
     "url": "https://www.mlb.com/mets/news/mark-vientos-tendered-contract-2027-mets"
   },
@@ -18,10 +23,5 @@
     "source": "MLB.com",
     "title": "Mets add SS Rojas (No. 1 prospect) to 40-man roster",
     "url": "https://www.mlb.com/mets/news/jefferson-rojas-added-to-mets-40-man-roster"
-  },
-  {
-    "source": "MLB.com",
-    "title": "Mathis takes home final Fall League Hitter of the Week honors",
-    "url": "https://www.mlb.com/mets/news/arizona-fall-league-week-6-award-winners-2026"
   }
 ]
